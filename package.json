@@ -11,6 +11,6 @@
   },
   "author": "vadym udod",
   "dependencies": {
-    "com.coffee.ui-particle": "https://github.com/mob-sakai/ParticleEffectForUGUI.git"
+    "com.coffee.ui-particle": "v2.3.0"
   }
 }
