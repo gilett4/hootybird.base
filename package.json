@@ -11,6 +11,6 @@
   },
   "author": "vadym udod",
   "dependencies": {
-    "https://github.com/mob-sakai/ParticleEffectForUGUI"
+    "https://github.com/mob-sakai/ParticleEffectForUGUI" : "v2.3.0"
   }
 }
