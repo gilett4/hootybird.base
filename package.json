@@ -7,10 +7,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gilett4/hootybird.base"
+    "url": "https://github.com/gilett4/hootybird.core"
   },
   "author": "vadym udod",
   "dependencies": {
-    "https://github.com/mob-sakai/ParticleEffectForUGUI" : "v2.3.0"
+    "com.coffee.ui-particle": "https://github.com/mob-sakai/ParticleEffectForUGUI.git",
   }
 }
