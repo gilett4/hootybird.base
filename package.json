@@ -11,7 +11,6 @@
   },
   "author": "vadym udod",
   "dependencies": {
-	"https://github.com/dbrizov/NaughtyAttributes#upm" : "2.0.6",
-    "https://github.com/mob-sakai/ParticleEffectForUGUI" : "2.3.0"
+    "https://github.com/mob-sakai/ParticleEffectForUGUI"
   }
 }
