@@ -1,0 +1,15 @@
+{
+    "name": "com.hootybird.base.Editor",
+    "references": [
+        "GUID:d009573c4d4dfe246ad2ffab897712b1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
