@@ -16,10 +16,7 @@ namespace hootybird.Tools.Pools
 
         public PoolManager Pool => Pools.GetPool(id);
 
-        protected virtual void OnDestroy()
-        {
-            Pools.Remove(this);
-        }
+        protected virtual void OnDestroy() => Pools.Remove(this);
 
         public T GetInstance<T>() where T : PoolItem => Pools.Pull<T>(this);
 

@@ -2,6 +2,7 @@
 
 using Coffee.UIExtensions;
 using hootybird.audio;
+using hootybird.Tools.Pools;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,9 +10,8 @@ using UnityEngine.Events;
 
 namespace hootybird.Mechanics._Vfx
 {
-    public class Vfx : MonoBehaviour
+    public class Vfx : PoolItem
     {
-        public string type;
         public float duration = 1f;
         public float uiCopyScale = 100f;
         public UnityEvent onStart;
@@ -138,9 +138,7 @@ namespace hootybird.Mechanics._Vfx
 
             durationLeft = 0f;
 
-            //if this vfx is controlled by its parent vfx, unactivate parent too
-            if (copyParent)
-                copyParent.isActive = false;
+            PutBack();
         }
 
         public void PlaySfx(string audio, float volume) => AudioHolder.Instance.PlaySelfSfxOneShotTracked(audio, volume);

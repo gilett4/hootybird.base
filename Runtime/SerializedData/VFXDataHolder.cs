@@ -1,7 +1,7 @@
 ﻿//@vadym udod
 
 using hootybird.Mechanics._Vfx;
-using System;
+using NaughtyAttributes;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,13 +10,15 @@ namespace hootybird.Serialized
     [CreateAssetMenu(fileName = "DefaultVFXHolder", menuName = "Create VFX Data Holder")]
     public class VFXDataHolder : ScriptableObject
     {
+        [ReorderableList]
         public List<VfxData> list;
     }
 
-    [Serializable]
+    [System.Serializable]
     public class VfxData
     {
-        public string type;
-        public Vfx[] options;
+        public string id;
+        [ReorderableList]
+        public List<Vfx> vfxs;
     }
 }

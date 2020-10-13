@@ -11,6 +11,8 @@ namespace hootybird.Tools.Pools
 
         public static PoolManager AddPool(IPoolItem item, Transform instancesParent)
         {
+            if (pools.ContainsKey(item.id)) return pools[item.id];
+
             PoolManager poolManager = new PoolManager(item, instancesParent);
             pools.Add(item.id, poolManager);
 
