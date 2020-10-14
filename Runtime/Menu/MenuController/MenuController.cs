@@ -14,6 +14,19 @@ namespace hootybird.UI.Menu
     /// </summary>
     public class MenuController : MonoBehaviour
     {
+        public static MenuController activeMenu
+        {
+            get
+            {
+                if (PersistantMenuController.instance.screensStack.Count > 0)
+                    return PersistantMenuController.instance;
+                else
+                    return _activeMenu;
+            }
+            set => _activeMenu = value;
+        }
+        private static MenuController _activeMenu;
+
         public static Dictionary<string, MenuController> menus = new Dictionary<string, MenuController>();
         public static Dictionary<string, MenuEvents> menuEvents = new Dictionary<string, MenuEvents>();
 
@@ -61,6 +74,7 @@ namespace hootybird.UI.Menu
             heightScaled = Screen.width / canvaseScaler.referenceResolution.x * canvaseScaler.referenceResolution.y;
 
             if (!menus.ContainsKey(gameObject.name)) menus.Add(gameObject.name, this);
+            if (GetType() != typeof(PersistantMenuController)) activeMenu = this;
         }
 
         protected virtual void Start()
@@ -83,18 +97,14 @@ namespace hootybird.UI.Menu
             currentScreen = screens[index];
         }
 
-        public void SetCurrentScreen(MenuScreen screen)
-        {
-            SetCurrentScreen(screens.IndexOf(screen));
-        }
+        public void SetCurrentScreen(MenuScreen screen) => SetCurrentScreen(screens.IndexOf(screen));
 
         /// <summary>
         /// Invokes OnBack on current screen
         /// </summary>
         public void CurrentScreenOnBack()
         {
-            if (currentScreen)
-                currentScreen.OnBack();
+            if (currentScreen) currentScreen.OnBack();
         }
 
         /// <summary>
@@ -159,11 +169,11 @@ namespace hootybird.UI.Menu
 
         public void OpenScreen(MenuScreen screen)
         {
-            if (currentScreen && screen.closePreviousWhenOpened) currentScreen.Close();
+            if (currentScreen && currentScreen != screen && currentScreen.isOpened && screen.closePreviousWhenOpened) currentScreen.Close();
+
+            if (!currentScreen || (currentScreen != screen)) screensStack.Push(screen);
 
             SetCurrentScreen(screen);
-            screensStack.Push(currentScreen);
-
             currentScreen.Open();
         }
 
@@ -235,6 +245,7 @@ namespace hootybird.UI.Menu
 
             if (state)
             {
+                activeMenu = this;
                 if (currentScreen) currentScreen.Open();
 
                 ExecuteMenuEvents();
