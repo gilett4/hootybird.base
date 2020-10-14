@@ -3,14 +3,13 @@
 using hootybird.audio;
 using hootybird.Tools;
 using hootybird.Tween;
-using hootybird.UI.Widgets;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace hootybird.UI.Menu
+namespace hootybird.UI
 {
     /// <summary>
     /// Represents each separate screen in a menu

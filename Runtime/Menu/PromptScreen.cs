@@ -5,7 +5,7 @@ using hootybird.UI.Helpers;
 using System;
 using TMPro;
 
-namespace hootybird.UI.Menu.Screens
+namespace hootybird.UI
 {
     /// <summary>
     /// Promp screen can be used in various places

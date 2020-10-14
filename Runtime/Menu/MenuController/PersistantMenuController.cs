@@ -2,9 +2,8 @@
 
 
 using hootybird.Tools;
-using UnityEngine;
 
-namespace hootybird.UI.Menu
+namespace hootybird.UI
 {
     public class PersistantMenuController : MenuController
     {

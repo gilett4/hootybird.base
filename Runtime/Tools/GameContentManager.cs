@@ -1,6 +1,6 @@
 ﻿//@vadym udod
 
-using hootybird.UI.Menu;
+using hootybird.UI;
 using NaughtyAttributes;
 using System;
 using System.Collections.Generic;

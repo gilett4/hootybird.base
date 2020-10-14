@@ -2,11 +2,10 @@
 
 using hootybird.Tools;
 using hootybird.Tween;
-using hootybird.UI.Menu;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace hootybird.UI.Widgets
+namespace hootybird.UI
 {
     public abstract class WidgetBase : RoutinesBase
     {
