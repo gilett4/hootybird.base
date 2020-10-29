@@ -1,5 +1,6 @@
 ﻿//@vadym udod
 
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.UI;
 
@@ -37,3 +38,4 @@ namespace hootybird.UI.Helpers
         }
     }
 }
+#endif

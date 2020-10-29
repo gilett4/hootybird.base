@@ -1,5 +1,6 @@
 ﻿//@vadym udod
 
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.EventSystems;
 
@@ -41,3 +42,4 @@ namespace hootybird.UI.Helpers.Touch
         }
     }
 }
+#endif
