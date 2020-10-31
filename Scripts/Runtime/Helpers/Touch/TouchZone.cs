@@ -20,7 +20,7 @@ namespace hootybird.UI.Helpers.Touch
 
         public void Awake()
         {
-            canvas = CheckObj(transform);
+            canvas = GetComponentInParent<Canvas>();
         }
 
         public override void OnPointerDown(PointerEventData eventData)
@@ -63,19 +63,6 @@ namespace hootybird.UI.Helpers.Touch
                 onPointerUp.Invoke(new Vector2(eventData.position.x / canvas.transform.lossyScale.x, eventData.position.y / canvas.transform.lossyScale.y));
             else
                 onPointerUp.Invoke(new Vector2(eventData.position.x, eventData.position.y));
-        }
-
-        private Canvas CheckObj(Transform @object)
-        {
-            if (@object)
-            {
-                if (@object.GetComponent<Canvas>() != null)
-                    return @object.GetComponent<Canvas>();
-                else
-                    return CheckObj(@object.parent);
-            }
-            else
-                return null;
         }
     }
 

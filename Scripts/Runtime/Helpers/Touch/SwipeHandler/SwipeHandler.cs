@@ -1,110 +1,181 @@
 ﻿//@vadym udod
 
+using hootybird.Tools;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace hootybird.UI.Helpers
 {
-    public class SwipeHandler : MonoBehaviour
+    public class SwipeHandler : EventTrigger
     {
-        public SwipeAxis swipeDirection = SwipeAxis.HORIZONTAL;
+        internal const float MAX_ANGLE_DEVIATION = 30f;
 
-        [Tooltip("Distance that pointer need to trave\n to trigger swipe event")]
-        [Range(0f, 1f)]
-        public float swipeDistance = .1f;
-        [Tooltip("Time during which swipe can occur")]
-        public float swipeTime = .2f;
+        public Action<Swipe> onSwipe;
+        public SwipeSolveMethod method;
 
-        public Action<SwipeDirection> onSwipe;
+        private SwipePointsCollection collection = new SwipePointsCollection();
 
-        private float swipeTimer;
-        private bool checking = false;
-        private float _swipeDistance;
-
-        protected void Awake()
+        public override void OnDrag(PointerEventData eventData)
         {
-            _swipeDistance = Mathf.Min(Screen.width, Screen.height) * swipeDistance;
+            base.OnDrag(eventData);
+
+            if (eventData.pointerId > 0) return;
+
+            collection.Add(eventData.position, Time.time);
         }
 
-        protected void Update()
+        public override void OnPointerDown(PointerEventData eventData)
         {
-            if (checking)
-                swipeTimer += Time.deltaTime;
+            base.OnPointerDown(eventData);
+
+            if (eventData.pointerId > 0) return;
+
+            collection.Add(eventData.position, Time.time);
         }
 
-        public void OnPointerDown(Vector2 position)
+        public override void OnPointerUp(PointerEventData eventData)
         {
-            swipeTimer = 0f;
-            checking = true;
+            base.OnPointerUp(eventData);
+
+            if (eventData.pointerId > 0) return;
+
+            onSwipe?.Invoke(Solve(method, collection.points));
+            collection.Clear();
         }
 
-        public void OnPointerMove(Vector2 position)
+        public static Swipe Solve(SwipeSolveMethod method, List<SwipePoint> points)
         {
-            if (!checking)
-                return;
-
-            if (swipeTimer <= swipeTime)
+            switch (method)
             {
-                switch (swipeDirection)
-                {
-                    case SwipeAxis.HORIZONTAL:
-                        if (position.x > _swipeDistance)
-                            InvokeSwipe(SwipeDirection.RIGHT);
-                        else if (position.x <= -_swipeDistance)
-                            InvokeSwipe(SwipeDirection.LEFT);
-                        break;
+                case SwipeSolveMethod.BY_LAST_ANGLE:
+                    List<SwipePoint> newPoints = new List<SwipePoint>();
+                    if (points.Count > 2)
+                    {
+                        float angleAcc = 0f;
+                        int pointIndex = points.Count - 1;
 
-                    case SwipeAxis.VERTICAL:
-                        if (position.y >= _swipeDistance)
-                            InvokeSwipe(SwipeDirection.UP);
-                        else if (position.y <= -_swipeDistance)
-                            InvokeSwipe(SwipeDirection.DOWN);
-                        break;
+                        do
+                        {
+                            newPoints.Add(points[pointIndex]);
+                            pointIndex--;
+                        }
+                        while ((angleAcc + points[pointIndex].angleDelta) < MAX_ANGLE_DEVIATION && pointIndex >= 0);
 
-                    case SwipeAxis.BOTH:
-                        if (Mathf.Abs(position.x) > Mathf.Abs(position.y))
-                        {
-                            if (position.x > _swipeDistance)
-                                InvokeSwipe(SwipeDirection.RIGHT);
-                            else if (position.x <= -_swipeDistance)
-                                InvokeSwipe(SwipeDirection.LEFT);
-                        }
-                        else
-                        {
-                            if (position.y >= _swipeDistance)
-                                InvokeSwipe(SwipeDirection.UP);
-                            else if (position.y <= -_swipeDistance)
-                                InvokeSwipe(SwipeDirection.DOWN);
-                        }
-                        break;
-                }
-            }
-            else
-                checking = false;
+                        newPoints.Reverse();
+                    }
+                    else
+                        newPoints = points;
+
+                    return new Swipe(newPoints);
+
+                default:
+                    return new Swipe(points);
+            };
         }
+    }
 
-        public void InvokeSwipe(SwipeDirection swipeDirection)
+    public class Swipe : SwipePointsCollection
+    {
+        public bool IsHorizontal
         {
-            onSwipe?.Invoke(swipeDirection);
+            get
+            {
+                float _angle = Angle;
 
-            swipeTimer = 0f;
-            checking = false;
+                return (_angle > 315f || (_angle >= 0f && _angle < 45f)) || (_angle > 135f && _angle < 225f);
+            }
+        }
+
+        public bool IsVertical => !IsHorizontal;
+
+        public float Angle => points.Count > 1 ?
+                        Vector2.right.AngleTo(points[points.Count - 1].position - points[points.Count - 2].position) : 0f;
+
+        public float Length => GetPointsLength(points);
+
+        public float TotalTime => GetSwipeTime(points);
+
+        public Swipe() { }
+
+        public Swipe(List<SwipePoint> points) : base(points) { }
+    }
+
+    public class SwipePointsCollection
+    {
+        public List<SwipePoint> points;
+
+        public SwipePoint this[int index]
+        {
+            get => points[index];
+        }
+
+        public SwipePointsCollection()
+        {
+            points = new List<SwipePoint>();
+        }
+
+        public SwipePointsCollection(List<SwipePoint> points)
+        {
+            this.points = points;
+        }
+
+        public void Add(Vector2 point, float time = -1f)
+        {
+            SwipePoint swipePoint = new SwipePoint(point, time);
+            points.Add(swipePoint);
+
+            if (points.Count > 1)
+            {
+                swipePoint.angle =
+                    Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
+                swipePoint.angleDelta = swipePoint.angle - points[points.Count - 2].angle;
+                swipePoint.timeAdded = time;
+                swipePoint.timeDelta = time - points[points.Count - 2].timeAdded;
+            }
+        }
+
+        public void Clear()
+        {
+            points = new List<SwipePoint>();
+        }
+
+        public static float GetPointsLength(List<SwipePoint> points)
+        {
+            float length = 0f;
+
+            if (points.Count > 1)
+                for (int index = 1; index < points.Count; index++)
+                    length += Vector2.Distance(points[index - 1].position, points[index].position);
+            else if (points.Count == 1)
+                length = points[0].position.magnitude;
+
+            return length;
+        }
+
+        public static float GetSwipeTime(List<SwipePoint> points) => points.Sum(_point => _point.timeDelta);
+    }
+
+    public class SwipePoint
+    {
+        internal Vector2 position;
+        internal float angle = 0f;
+        internal float angleDelta = 0f;
+        internal float timeAdded = 0f;
+        internal float timeDelta = 0f;
+
+        public SwipePoint(Vector2 position, float timeAdded)
+        {
+            this.position = position;
+            this.timeAdded = timeAdded;
         }
     }
 
-    public enum SwipeAxis
+    public enum SwipeSolveMethod
     {
-        HORIZONTAL,
-        VERTICAL,
-        BOTH,
-    }
-
-    [Serializable]
-    public enum SwipeDirection
-    {
-        LEFT,
-        RIGHT,
-        UP,
-        DOWN,
+        NONE,
+        BY_LAST_ANGLE,
     }
 }
