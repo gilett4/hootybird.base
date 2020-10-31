@@ -17,6 +17,7 @@ namespace hootybird.UI.Helpers
         public SwipeSolveMethod method;
 
         private SwipePointsCollection collection = new SwipePointsCollection();
+        private bool swipeEnded = false;
 
         public override void OnDrag(PointerEventData eventData)
         {
@@ -34,17 +35,37 @@ namespace hootybird.UI.Helpers
             if (eventData.pointerId > 0) return;
 
             collection.Add(eventData.position, Time.time);
+            swipeEnded = false;
         }
 
         public override void OnPointerUp(PointerEventData eventData)
         {
             base.OnPointerUp(eventData);
 
-            if (eventData.pointerId > 0) return;
+            if (eventData.pointerId > 0 || swipeEnded) return;
 
-            onSwipe?.Invoke(Solve(method, collection.points));
-            collection.Clear();
+            InvokeFromCurrentPoints();
         }
+
+        /// <summary>
+        /// Get swipe from current set of swipe points.
+        /// </summary>
+        /// <returns></returns>
+        public void ForceSwipe(bool endSwipe = true)
+        {
+            if (endSwipe) swipeEnded = true;
+
+            InvokeFromCurrentPoints(true);
+        }
+
+        private void InvokeFromCurrentPoints(bool clear = true)
+        {
+            onSwipe?.Invoke(Solve(method, collection.points));
+
+            if (clear) collection.Clear();
+        }
+
+        #region Static members
 
         public static Swipe Solve(SwipeSolveMethod method, List<SwipePoint> points)
         {
@@ -75,6 +96,8 @@ namespace hootybird.UI.Helpers
                     return new Swipe(points);
             };
         }
+
+        #endregion
     }
 
     public class Swipe : SwipePointsCollection
