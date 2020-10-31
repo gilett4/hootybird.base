@@ -16,6 +16,7 @@ namespace hootybird.UI.Helpers
         public Action<Swipe> onSwipe;
         public Action<Vector2> onPointerDown;
         public Action<Vector2> onPointerUp;
+        public Action<Vector2> onPointerDrag;
 
         [SerializeField]
         protected SwipeSolveMethod method = SwipeSolveMethod.BY_LAST_ANGLE;
@@ -32,6 +33,8 @@ namespace hootybird.UI.Helpers
             if (eventData.pointerId > 0) return;
 
             collection.Add(eventData.position, Time.time);
+
+            onPointerDrag?.Invoke(eventData.position);
         }
 
         public override void OnPointerDown(PointerEventData eventData)
