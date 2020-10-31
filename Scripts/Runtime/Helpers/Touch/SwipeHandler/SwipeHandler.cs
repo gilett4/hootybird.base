@@ -14,7 +14,11 @@ namespace hootybird.UI.Helpers
         internal const float MAX_ANGLE_DEVIATION = 30f;
 
         public Action<Swipe> onSwipe;
-        public SwipeSolveMethod method;
+
+        [SerializeField]
+        protected SwipeSolveMethod method = SwipeSolveMethod.BY_LAST_ANGLE;
+        [SerializeField]
+        protected bool normalize = true;
 
         private SwipePointsCollection collection = new SwipePointsCollection();
         private bool swipeEnded = false;
@@ -60,6 +64,8 @@ namespace hootybird.UI.Helpers
 
         private void InvokeFromCurrentPoints(bool clear = true)
         {
+            if (normalize) collection.Scale(1f / Screen.width, 1f / Screen.height);
+
             onSwipe?.Invoke(Solve(method, collection.points));
 
             if (clear) collection.Clear();
@@ -165,6 +171,10 @@ namespace hootybird.UI.Helpers
             points = new List<SwipePoint>();
         }
 
+        public void Scale(Vector2 value) => points.ForEach(_point => _point.position.Scale(value));
+
+        public void Scale(float x, float y) => Scale(new Vector2(x, y));
+
         public static float GetPointsLength(List<SwipePoint> points)
         {
             float length = 0f;
@@ -183,11 +193,11 @@ namespace hootybird.UI.Helpers
 
     public class SwipePoint
     {
-        internal Vector2 position;
-        internal float angle = 0f;
-        internal float angleDelta = 0f;
-        internal float timeAdded = 0f;
-        internal float timeDelta = 0f;
+        public Vector2 position;
+        public float angle = 0f;
+        public float angleDelta = 0f;
+        public float timeAdded = 0f;
+        public float timeDelta = 0f;
 
         public SwipePoint(Vector2 position, float timeAdded)
         {
