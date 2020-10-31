@@ -14,11 +14,13 @@ namespace hootybird.UI.Helpers
         internal const float MAX_ANGLE_DEVIATION = 30f;
 
         public Action<Swipe> onSwipe;
+        public Action<Vector2> onPointerDown;
+        public Action<Vector2> onPointerUp;
 
         [SerializeField]
         protected SwipeSolveMethod method = SwipeSolveMethod.BY_LAST_ANGLE;
         [SerializeField]
-        protected bool normalize = true;
+        protected bool normalizeSwipePoints = true;
 
         private SwipePointsCollection collection = new SwipePointsCollection();
         private bool swipeEnded = false;
@@ -40,11 +42,15 @@ namespace hootybird.UI.Helpers
 
             collection.Add(eventData.position, Time.time);
             swipeEnded = false;
+
+            onPointerDown?.Invoke(eventData.position);
         }
 
         public override void OnPointerUp(PointerEventData eventData)
         {
             base.OnPointerUp(eventData);
+
+            onPointerUp?.Invoke(eventData.position);
 
             if (eventData.pointerId > 0 || swipeEnded) return;
 
@@ -64,7 +70,7 @@ namespace hootybird.UI.Helpers
 
         private void InvokeFromCurrentPoints(bool clear = true)
         {
-            if (normalize) collection.Scale(1f / Screen.width, 1f / Screen.height);
+            if (normalizeSwipePoints) collection.Scale(1f / Screen.width, 1f / Screen.height);
 
             onSwipe?.Invoke(Solve(method, collection.points));
 
