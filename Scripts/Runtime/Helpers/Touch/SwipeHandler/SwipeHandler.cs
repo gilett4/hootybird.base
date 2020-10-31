@@ -66,6 +66,7 @@ namespace hootybird.UI.Helpers
         /// <returns></returns>
         public void ForceSwipe(bool endSwipe = true)
         {
+            if (swipeEnded) return;
             if (endSwipe) swipeEnded = true;
 
             InvokeFromCurrentPoints(true);
@@ -106,6 +107,42 @@ namespace hootybird.UI.Helpers
                         newPoints = points;
 
                     return new Swipe(newPoints);
+
+                case SwipeSolveMethod.BY_LENGTH:
+                    List<SwipePoint> currentGroup;
+                    List<SwipePoint> longestGroup = new List<SwipePoint>();
+
+                    for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
+                    {
+                        float angleAcc = 0;
+                        currentGroup = new List<SwipePoint>();
+
+                        for (int groupIndex = pointIndex; groupIndex < points.Count; groupIndex++)
+                        {
+                            if (groupIndex > pointIndex) angleAcc += points[groupIndex].angleDelta;
+
+                            currentGroup.Add(points[groupIndex]);
+
+                            if (Mathf.Abs(angleAcc) > MAX_ANGLE_DEVIATION)
+                            {
+                                float longestLength = SwipePointsCollection.GetPointsLength(longestGroup);
+
+                                if (SwipePointsCollection.GetPointsLength(currentGroup) > longestLength)
+                                {
+                                    longestGroup = new List<SwipePoint>(currentGroup);
+
+                                    if (longestLength >= (SwipePointsCollection.GetPointsLength(points) * .5f))
+                                        return new Swipe(longestGroup);
+                                    else
+                                        break;
+                                }
+                                else
+                                    break;
+                            }
+                        }
+                    }
+
+                    return new Swipe(longestGroup);
 
                 default:
                     return new Swipe(points);
@@ -160,18 +197,28 @@ namespace hootybird.UI.Helpers
             this.points = points;
         }
 
-        public void Add(Vector2 point, float time = -1f)
+        public void Add(Vector2 point, float time = 0f)
         {
-            SwipePoint swipePoint = new SwipePoint(point, time);
-            points.Add(swipePoint);
+            SwipePoint newPoint = new SwipePoint(point, time);
+            SwipePoint prev = null;
+
+            if (points.Count > 0) prev = points.Last();
+
+            points.Add(newPoint);
 
             if (points.Count > 1)
             {
-                swipePoint.angle =
-                    Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
-                swipePoint.angleDelta = swipePoint.angle - points[points.Count - 2].angle;
-                swipePoint.timeAdded = time;
-                swipePoint.timeDelta = time - points[points.Count - 2].timeAdded;
+                //swipePoint.angle =
+                //    Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
+                //swipePoint.angleDelta = swipePoint.angle - points[points.Count - 2].angle;
+                //swipePoint.timeAdded = time;
+                //swipePoint.timeDelta = time - points[points.Count - 2].timeAdded;
+
+                prev.angle = Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
+                prev.timeDelta = time - prev.timeDelta;
+
+                if (points.Count > 2)
+                    prev.angleDelta = prev.angle - points[points.Count - 3].angle;
             }
         }
 
@@ -219,5 +266,6 @@ namespace hootybird.UI.Helpers
     {
         NONE,
         BY_LAST_ANGLE,
+        BY_LENGTH,
     }
 }
