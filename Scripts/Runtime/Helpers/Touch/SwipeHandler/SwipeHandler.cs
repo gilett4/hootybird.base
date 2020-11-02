@@ -273,14 +273,8 @@ namespace hootybird.UI.Helpers
 
             if (points.Count > 1)
             {
-                //swipePoint.angle =
-                //    Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
-                //swipePoint.angleDelta = swipePoint.angle - points[points.Count - 2].angle;
-                //swipePoint.timeAdded = time;
-                //swipePoint.timeDelta = time - points[points.Count - 2].timeAdded;
-
                 prev.angle = Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
-                prev.timeDelta = time - prev.timeDelta;
+                prev.timeDelta = time - prev.time;
 
                 if (points.Count > 2)
                     prev.angleDelta = prev.angle - points[points.Count - 3].angle;
@@ -315,13 +309,13 @@ namespace hootybird.UI.Helpers
         public Vector2 position;
         public float angle = 0f;
         public float angleDelta = 0f;
-        public float timeAdded = 0f;
+        public float time = 0f;
         public float timeDelta = 0f;
 
         public SwipePoint(Vector2 position, float timeAdded)
         {
             this.position = position;
-            this.timeAdded = timeAdded;
+            this.time = timeAdded;
         }
     }
 
