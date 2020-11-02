@@ -10,14 +10,20 @@ namespace hootybird.UI.Helpers
     public class SwipeHandlerEditor : EventTriggerEditor
     {
         private SerializedProperty methodProperty;
-        private SerializedProperty normalizeProperty;
+        private SerializedProperty forceSwipeAtLengthProperty;
+        private SerializedProperty swipeLengthProperty;
+        private SerializedProperty debugLastSwipeProperty;
+        private SerializedProperty pointDeltaProperty;
 
         protected override void OnEnable()
         {
             base.OnEnable();
 
             methodProperty = serializedObject.FindProperty("method");
-            normalizeProperty = serializedObject.FindProperty("normalizeSwipePoints");
+            pointDeltaProperty = serializedObject.FindProperty("pointDelta");
+            forceSwipeAtLengthProperty = serializedObject.FindProperty("forceSwipeAtLength");
+            swipeLengthProperty = serializedObject.FindProperty("swipeLength");
+            debugLastSwipeProperty = serializedObject.FindProperty("debugLastSwipe");
         }
 
         public override void OnInspectorGUI()
@@ -25,7 +31,12 @@ namespace hootybird.UI.Helpers
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(methodProperty);
-            EditorGUILayout.PropertyField(normalizeProperty);
+            EditorGUILayout.PropertyField(pointDeltaProperty);
+            EditorGUILayout.PropertyField(forceSwipeAtLengthProperty);
+
+            if (forceSwipeAtLengthProperty.boolValue) EditorGUILayout.PropertyField(swipeLengthProperty);
+
+            EditorGUILayout.PropertyField(debugLastSwipeProperty);
 
             serializedObject.ApplyModifiedProperties();
 

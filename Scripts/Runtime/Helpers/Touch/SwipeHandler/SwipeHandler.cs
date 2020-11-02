@@ -17,24 +17,58 @@ namespace hootybird.UI.Helpers
         public Action<Vector2> onPointerDown;
         public Action<Vector2> onPointerUp;
         public Action<Vector2> onPointerDrag;
+        public Action<SwipePoint, bool> onNewPointAdded;
+
+        [SerializeField, Tooltip("Optional method to optimize swipe output data")]
+        protected SwipeSolveMethod method = SwipeSolveMethod.BY_LAST_ANGLE;
+
+        [SerializeField, Tooltip("New point is added only if pointer travelled X from previous point"), Range(.001f, .02f)]
+        protected float pointDelta = .01f;
 
         [SerializeField]
-        protected SwipeSolveMethod method = SwipeSolveMethod.BY_LAST_ANGLE;
+        protected bool forceSwipeAtLength = false;
+
+        [SerializeField, Tooltip("Force invoke swipe after given distance is travelled (0.05f-.5f)"), Range(.05f, .5f)]
+        protected float swipeLength = .1f;
+
         [SerializeField]
-        protected bool normalizeSwipePoints = true;
+        protected bool debugLastSwipe = false;
 
         private SwipePointsCollection collection = new SwipePointsCollection();
+        private Swipe lastSwipe;
         private bool swipeEnded = false;
+        private float _pointDelta;
+        private float _swipeLength = -1f;
 
-        public override void OnDrag(PointerEventData eventData)
+        protected void Awake()
         {
-            base.OnDrag(eventData);
+            Vector2 resolution = new Vector2(Screen.width, Screen.height);
+            _pointDelta = resolution.magnitude * pointDelta;
 
-            if (eventData.pointerId > 0) return;
+            if (forceSwipeAtLength) _swipeLength = resolution.magnitude * swipeLength;
+        }
 
-            collection.Add(eventData.position, Time.time);
+        protected void OnDrawGizmos()
+        {
+            if (!debugLastSwipe) return;
 
-            onPointerDrag?.Invoke(eventData.position);
+            Color prev = Gizmos.color;
+
+            if (collection.points.Count > 0)
+            {
+                Gizmos.color = Color.yellow;
+                for (int pointIndex = 1; pointIndex < collection.points.Count; pointIndex++)
+                    Gizmos.DrawLine(collection.points[pointIndex - 1].position, collection.points[pointIndex].position);
+            }
+
+            if (lastSwipe != null && lastSwipe.points.Count > 1)
+            {
+                Gizmos.color = Color.green;
+                for (int pointIndex = 1; pointIndex < lastSwipe.points.Count; pointIndex++)
+                    Gizmos.DrawLine(lastSwipe.points[pointIndex - 1].position, lastSwipe.points[pointIndex].position);
+            }
+
+            Gizmos.color = prev;
         }
 
         public override void OnPointerDown(PointerEventData eventData)
@@ -44,9 +78,41 @@ namespace hootybird.UI.Helpers
             if (eventData.pointerId > 0) return;
 
             collection.Add(eventData.position, Time.time);
+            onNewPointAdded?.Invoke(collection.points.Last(), true);
             swipeEnded = false;
 
             onPointerDown?.Invoke(eventData.position);
+        }
+
+        public override void OnDrag(PointerEventData eventData)
+        {
+            base.OnDrag(eventData);
+
+            if (eventData.pointerId > 0 || swipeEnded) return;
+
+            bool swipeDistanceTravelled = false;
+            if (collection.points.Count > 0)
+            {
+                if ((eventData.position - collection.points.Last().position).magnitude >= _pointDelta)
+                {
+                    collection.Add(eventData.position, Time.time);
+
+                    if (forceSwipeAtLength && SwipePointsCollection.GetPointsLength(collection.points) >= _swipeLength)
+                        swipeDistanceTravelled = true;
+                }
+
+                onNewPointAdded?.Invoke(collection.points.Last(), false);
+            }
+            else
+            {
+                collection.Add(eventData.position, Time.time);
+
+                onNewPointAdded?.Invoke(collection.points.Last(), true);
+            }
+
+            onPointerDrag?.Invoke(eventData.position);
+
+            if (swipeDistanceTravelled) ForceSwipe();
         }
 
         public override void OnPointerUp(PointerEventData eventData)
@@ -58,6 +124,7 @@ namespace hootybird.UI.Helpers
             if (eventData.pointerId > 0 || swipeEnded) return;
 
             InvokeFromCurrentPoints();
+            swipeEnded = true;
         }
 
         /// <summary>
@@ -66,7 +133,6 @@ namespace hootybird.UI.Helpers
         /// <returns></returns>
         public void ForceSwipe(bool endSwipe = true)
         {
-            if (swipeEnded) return;
             if (endSwipe) swipeEnded = true;
 
             InvokeFromCurrentPoints(true);
@@ -74,9 +140,8 @@ namespace hootybird.UI.Helpers
 
         private void InvokeFromCurrentPoints(bool clear = true)
         {
-            if (normalizeSwipePoints) collection.Scale(1f / Screen.width, 1f / Screen.height);
-
-            onSwipe?.Invoke(Solve(method, collection.points));
+            lastSwipe = Solve(method, collection.points);
+            onSwipe?.Invoke(lastSwipe);
 
             if (clear) collection.Clear();
         }
@@ -99,7 +164,7 @@ namespace hootybird.UI.Helpers
                             newPoints.Add(points[pointIndex]);
                             pointIndex--;
                         }
-                        while ((angleAcc + points[pointIndex].angleDelta) < MAX_ANGLE_DEVIATION && pointIndex >= 0);
+                        while (pointIndex >= 0 && (angleAcc + points[pointIndex].angleDelta) < MAX_ANGLE_DEVIATION);
 
                         newPoints.Reverse();
                     }
@@ -114,7 +179,7 @@ namespace hootybird.UI.Helpers
 
                     for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
                     {
-                        float angleAcc = 0;
+                        float angleAcc = 0f;
                         currentGroup = new List<SwipePoint>();
 
                         for (int groupIndex = pointIndex; groupIndex < points.Count; groupIndex++)
@@ -123,15 +188,15 @@ namespace hootybird.UI.Helpers
 
                             currentGroup.Add(points[groupIndex]);
 
-                            if (Mathf.Abs(angleAcc) > MAX_ANGLE_DEVIATION)
+                            if (Mathf.Abs(angleAcc) > MAX_ANGLE_DEVIATION || groupIndex == points.Count - 1)
                             {
-                                float longestLength = SwipePointsCollection.GetPointsLength(longestGroup);
-
-                                if (SwipePointsCollection.GetPointsLength(currentGroup) > longestLength)
+                                if (SwipePointsCollection.GetPointsLength(currentGroup) > 
+                                    SwipePointsCollection.GetPointsLength(longestGroup))
                                 {
                                     longestGroup = new List<SwipePoint>(currentGroup);
 
-                                    if (longestLength >= (SwipePointsCollection.GetPointsLength(points) * .5f))
+                                    if (SwipePointsCollection.GetPointsLength(longestGroup)
+                                        >= (SwipePointsCollection.GetPointsLength(points) * .5f))
                                         return new Swipe(longestGroup);
                                     else
                                         break;
@@ -238,8 +303,6 @@ namespace hootybird.UI.Helpers
             if (points.Count > 1)
                 for (int index = 1; index < points.Count; index++)
                     length += Vector2.Distance(points[index - 1].position, points[index].position);
-            else if (points.Count == 1)
-                length = points[0].position.magnitude;
 
             return length;
         }
