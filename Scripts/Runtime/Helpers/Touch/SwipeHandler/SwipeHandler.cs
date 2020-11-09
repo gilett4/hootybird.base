@@ -150,68 +150,83 @@ namespace hootybird.UI.Helpers
 
         public static Swipe Solve(SwipeSolveMethod method, List<SwipePoint> points)
         {
-            switch (method)
+            List<SwipePoint> _points = new List<SwipePoint>();
+
+            if (points.Count > 2)
             {
-                case SwipeSolveMethod.BY_LAST_ANGLE:
-                    List<SwipePoint> newPoints = new List<SwipePoint>();
-                    if (points.Count > 2)
-                    {
-                        float angleAcc = 0f;
-                        int pointIndex = points.Count - 1;
+                float angle = 0f;
+                int pointIndex;
+
+                switch (method)
+                {
+                    case SwipeSolveMethod.BY_LAST_ANGLE:
+                        pointIndex = points.Count - 1;
 
                         do
                         {
-                            newPoints.Add(points[pointIndex]);
+                            _points.Add(points[pointIndex]);
                             pointIndex--;
                         }
-                        while (pointIndex >= 0 && (angleAcc + points[pointIndex].angleDelta) < MAX_ANGLE_DEVIATION);
+                        while (pointIndex >= 0 && (angle + points[pointIndex].angleDelta) < MAX_ANGLE_DEVIATION);
 
-                        newPoints.Reverse();
-                    }
-                    else
-                        newPoints = points;
+                        _points.Reverse();
 
-                    return new Swipe(newPoints);
+                        break;
 
-                case SwipeSolveMethod.BY_LENGTH:
-                    List<SwipePoint> currentGroup;
-                    List<SwipePoint> longestGroup = new List<SwipePoint>();
+                    case SwipeSolveMethod.BY_LENGTH:
+                        List<SwipePoint> currentGroup;
 
-                    for (int pointIndex = 0; pointIndex < points.Count; pointIndex++)
-                    {
-                        float angleAcc = 0f;
-                        currentGroup = new List<SwipePoint>();
-
-                        for (int groupIndex = pointIndex; groupIndex < points.Count; groupIndex++)
+                        for (pointIndex = 0; pointIndex < points.Count; pointIndex++)
                         {
-                            if (groupIndex > pointIndex) angleAcc += points[groupIndex].angleDelta;
+                            angle = 0f;
+                            currentGroup = new List<SwipePoint>();
 
-                            currentGroup.Add(points[groupIndex]);
-
-                            if (Mathf.Abs(angleAcc) > MAX_ANGLE_DEVIATION || groupIndex == points.Count - 1)
+                            for (int groupIndex = pointIndex; groupIndex < points.Count; groupIndex++)
                             {
-                                if (SwipePointsCollection.GetPointsLength(currentGroup) > 
-                                    SwipePointsCollection.GetPointsLength(longestGroup))
-                                {
-                                    longestGroup = new List<SwipePoint>(currentGroup);
+                                if (groupIndex > pointIndex) angle += points[groupIndex].angleDelta;
 
-                                    if (SwipePointsCollection.GetPointsLength(longestGroup)
-                                        >= (SwipePointsCollection.GetPointsLength(points) * .5f))
-                                        return new Swipe(longestGroup);
+                                currentGroup.Add(points[groupIndex]);
+
+                                if (Mathf.Abs(angle) > MAX_ANGLE_DEVIATION || groupIndex == points.Count - 1)
+                                {
+                                    if (SwipePointsCollection.GetPointsLength(currentGroup) >
+                                        SwipePointsCollection.GetPointsLength(_points))
+                                    {
+                                        _points = new List<SwipePoint>(currentGroup);
+
+                                        if (SwipePointsCollection.GetPointsLength(_points)
+                                            >= (SwipePointsCollection.GetPointsLength(points) * .5f))
+                                            return new Swipe(_points);
+                                        else
+                                            break;
+                                    }
                                     else
                                         break;
                                 }
-                                else
-                                    break;
                             }
                         }
-                    }
 
-                    return new Swipe(longestGroup);
+                        break;
 
-                default:
-                    return new Swipe(points);
-            };
+                    case SwipeSolveMethod.BY_LAST_ANGLE_NOT_CUMULATIVE:
+                        int _index = points.Count - 1;
+
+                        do
+                        {
+                            _points.Add(points[_index]);
+                            _index--;
+                        }
+                        while (_index >= 0 && points[_index].angleDelta < MAX_ANGLE_DEVIATION);
+
+                        _points.Reverse();
+
+                        break;
+                }
+            }
+            else
+                _points = points;
+
+            return new Swipe(_points);
         }
 
         #endregion
@@ -276,8 +291,7 @@ namespace hootybird.UI.Helpers
                 prev.angle = Vector2.right.AngleTo((points[points.Count - 1].position - points[points.Count - 2].position));
                 prev.timeDelta = time - prev.time;
 
-                if (points.Count > 2)
-                    prev.angleDelta = prev.angle - points[points.Count - 3].angle;
+                if (points.Count > 2) prev.angleDelta = prev.angle - points[points.Count - 3].angle;
             }
         }
 
@@ -315,7 +329,7 @@ namespace hootybird.UI.Helpers
         public SwipePoint(Vector2 position, float timeAdded)
         {
             this.position = position;
-            this.time = timeAdded;
+            time = timeAdded;
         }
     }
 
@@ -324,5 +338,6 @@ namespace hootybird.UI.Helpers
         NONE,
         BY_LAST_ANGLE,
         BY_LENGTH,
+        BY_LAST_ANGLE_NOT_CUMULATIVE,
     }
 }
