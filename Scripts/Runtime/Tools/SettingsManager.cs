@@ -9,83 +9,108 @@ namespace hootybird.Managers
 {
     public class SettingsManager : RoutinesBase
     {
-        public static Action<bool> onSfx;
-        public static Action<bool> onAudio;
-        public static Action<bool> onDemoMode;
+        public static Action<string> onValueChanged;
+        public static Action<string, bool> onBoolChanged;
+        public static Action<string, int> onIntChanged;
+        public static Action<string, float> onFloatChanged;
 
-        public const string KEY_SFX = "SETTINGS_SFX";
-        public const string KEY_AUDIO = "SETTINGS_AUDIO";
-        public const string KEY_DEMO_MODE = "SETTINGS_DEMO_MODE";
+        public const string PREFIX = "";
 
-        public const bool DEFAULT_SFX = true; 
-        public const bool DEFAULT_AUDIO = true;
-        public const bool DEFAULT_DEMO_MODE = false;
+        private static Dictionary<string, SettingValueWrapper> values = new Dictionary<string, SettingValueWrapper>();
 
-        public static SettingsManager Instance
+        public static void Set(string key, int value)
         {
-            get
+            if (!values.ContainsKey(key))
+                AddValue(key, value);
+            else
+                values[key].IntValue = value;
+
+            onValueChanged?.Invoke(key);
+            onIntChanged?.Invoke(key, value);
+        }
+
+        public static void Set(string key, float value)
+        {
+            if (!values.ContainsKey(key))
+                AddValue(key, value);
+            else
+                values[key].FloatValue = value;
+
+            onValueChanged?.Invoke(key);
+            onFloatChanged?.Invoke(key, value);
+        }
+
+        public static void Set(string key, bool value)
+        {
+            if (!values.ContainsKey(key))
             {
-                if (instance == null) Initialize();
+                AddValue(key, value);
+                Set(key, value);
 
-                return instance;
+                return;
             }
+            else
+                values[key].IntValue = value ? 1 : 0;
+
+            onValueChanged?.Invoke(key);
+            onBoolChanged?.Invoke(key, value);
         }
-        private static SettingsManager instance;
 
-        public Dictionary<string, OptionValueWrapper> values = new Dictionary<string, OptionValueWrapper>
-        {
-            [KEY_SFX] = new OptionValueWrapper() { state = false, @default = DEFAULT_SFX, },
-            [KEY_AUDIO] = new OptionValueWrapper() { state = false, @default = DEFAULT_AUDIO, },
-            [KEY_DEMO_MODE] = new OptionValueWrapper() { state = false, @default = DEFAULT_DEMO_MODE, },
-        };
+        public static void Toggle(string key) => Set(key, values[key].BoolValue ? 0 : 1);
 
-        public void Set(string key, bool value)
+        public static int GetInt(string key) => values[key].IntValue;
+
+        public static float GetFloat(string key) => values[key].FloatValue;
+
+        public static bool GetBool(string key) => GetInt(key) == 1;
+
+        public static void AddValue(string key, int defaultValue)
         {
-            switch (key)
+            if (values.ContainsKey(key)) return;
+
+            values.Add(key, new SettingValueWrapper() { key = key, defaultIntValue = defaultValue });
+        }
+
+        public static void AddValue(string key, float defaultValue)
+        {
+            if (values.ContainsKey(key)) return;
+
+            values.Add(key, new SettingValueWrapper() { key = key, defaultFloatValue = defaultValue });
+        }
+
+        public static void AddValue(string key, bool value) => AddValue(key, value ? 1 : 0);
+
+        protected class SettingValueWrapper
+        {
+            internal bool isFloatValue = false;
+
+            internal string key;
+
+            internal int defaultIntValue;
+            internal float defaultFloatValue;
+
+            internal float FloatValue
             {
-                case KEY_SFX:
-                    PlayerPrefs.SetInt(key, (values[key].state = value) ? 1 : 0);
-                    onSfx?.Invoke(value);
+                get => PlayerPrefs.GetFloat(PREFIX + key, defaultFloatValue);
+                set
+                {
+                    if (!isFloatValue) isFloatValue = true;
 
-                    break;
-
-                case KEY_AUDIO:
-                    PlayerPrefs.SetInt(key, (values[key].state = value) ? 1 : 0);
-                    onAudio?.Invoke(value);
-
-                    break;
-
-                case KEY_DEMO_MODE:
-                    PlayerPrefs.SetInt(key, (values[key].state = value) ? 1 : 0);
-                    onDemoMode?.Invoke(value);
-
-                    break;
+                    PlayerPrefs.SetFloat(PREFIX + key, value);
+                }
             }
-        }
 
-        public void Toggle(string key) => Set(key, !values[key].state);
+            internal int IntValue
+            {
+                get => PlayerPrefs.GetInt(PREFIX + key, defaultIntValue);
+                set => PlayerPrefs.SetInt(PREFIX + key, value);
+            }
 
-        public bool Get(string key) => values[key].state;
-
-        public static void Initialize()
-        {
-            if (instance != null) return;
-
-            GameObject go = new GameObject("SettingsManager");
-            go.transform.SetParent(null);
-            instance = go.AddComponent<SettingsManager>();
-
-            DontDestroyOnLoad(go);
-
-            //get values
-            foreach (KeyValuePair<string, OptionValueWrapper> entry in instance.values)
-                entry.Value.state = PlayerPrefs.GetInt(entry.Key, entry.Value.@default ? 1 : 0) == 1 ? true : false;
-        }
-
-        public class OptionValueWrapper
-        {
-            public bool state;
-            public bool @default;
+            internal bool BoolValue
+            {
+                get => IntValue == 1;
+                set => IntValue = value ? 1 : 0;
+            }
         }
     }
 }

@@ -148,7 +148,7 @@ namespace hootybird.UI.Helpers
 
         #region Static members
 
-        public static Swipe Solve(SwipeSolveMethod method, List<SwipePoint> points)
+        public static Swipe Solve(SwipeSolveMethod method, List<SwipePoint> points, int minLength = -1)
         {
             List<SwipePoint> _points = new List<SwipePoint>();
 
