@@ -16,7 +16,10 @@ namespace hootybird.Managers
 
         public const string PREFIX = "";
 
-        private static Dictionary<string, SettingValueWrapper> values = new Dictionary<string, SettingValueWrapper>();
+        private static Dictionary<string, SettingValueWrapper> values = 
+            new Dictionary<string, SettingValueWrapper>();
+
+        public static bool ContainsKey(string key) => values.ContainsKey(key);
 
         public static void Set(string key, int value)
         {
