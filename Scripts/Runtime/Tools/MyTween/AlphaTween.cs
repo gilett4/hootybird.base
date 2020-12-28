@@ -12,7 +12,7 @@ namespace hootybird.Tween
         public float from = 0f;
         public float to = 1f;
 
-        public List<Graphics> alphaGroup { get; private set; }
+        public List<Graphics> graphics { get; private set; }
 
         /// <summary>
         /// Actual alpha value
@@ -51,7 +51,7 @@ namespace hootybird.Tween
         public void SetAlpha(float value)
         {
             _value = value;
-            foreach (Graphics group in alphaGroup) group.alpha = value;
+            foreach (Graphics group in graphics) group.alpha = value;
         }
 
         public override void OnReset()
@@ -61,9 +61,9 @@ namespace hootybird.Tween
 
         public override void OnInitialized()
         {
-            DoParse(customObjects, propagate);
+            graphics = DoParse(customObjects, propagate);
 
-            if (alphaGroup.Count > 0) _value = alphaGroup[0].alpha;
+            if (graphics.Count > 0) _value = graphics[0].alpha;
         }
     }
 }
