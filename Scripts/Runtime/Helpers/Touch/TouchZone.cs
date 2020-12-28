@@ -28,7 +28,9 @@ namespace hootybird.UI.Helpers.Touch
             base.OnPointerDown(eventData);
 
             if (scalePosition)
-                originPosition = new Vector2(eventData.position.x / canvas.transform.lossyScale.x, eventData.position.y / canvas.transform.lossyScale.y);
+                originPosition = new Vector2(
+                    eventData.position.x / canvas.transform.lossyScale.x,
+                    eventData.position.y / canvas.transform.lossyScale.y);
             else
                 originPosition = new Vector2(eventData.position.x, eventData.position.y);
 
@@ -39,20 +41,27 @@ namespace hootybird.UI.Helpers.Touch
         {
             base.OnDrag(eventData);
 
+            Vector2 _value = Vector2.zero;
             if (dragPositionRelative)
             {
                 if (scalePosition)
-                    onPointerMove.Invoke(new Vector2(eventData.position.x / canvas.transform.lossyScale.x, eventData.position.y / canvas.transform.lossyScale.y) - originPosition);
+                    _value = new Vector2(
+                        eventData.position.x / canvas.transform.lossyScale.x,
+                        eventData.position.y / canvas.transform.lossyScale.y) - originPosition;
                 else
-                    onPointerMove.Invoke(new Vector2(eventData.position.x, eventData.position.y) - originPosition);
+                    _value = new Vector2(eventData.position.x, eventData.position.y) - originPosition;
             }
             else
             {
                 if (scalePosition)
-                    onPointerMove.Invoke(new Vector2(eventData.position.x / canvas.transform.lossyScale.x, eventData.position.y / canvas.transform.lossyScale.y));
+                    _value = new Vector2(
+                        eventData.position.x / canvas.transform.lossyScale.x,
+                        eventData.position.y / canvas.transform.lossyScale.y);
                 else
-                    onPointerMove.Invoke(new Vector2(eventData.position.x, eventData.position.y));
+                    _value = new Vector2(eventData.position.x, eventData.position.y);
             }
+
+            onPointerMove.Invoke(_value);
         }
 
         public override void OnPointerUp(PointerEventData eventData)
@@ -60,7 +69,9 @@ namespace hootybird.UI.Helpers.Touch
             base.OnPointerUp(eventData);
 
             if (scalePosition)
-                onPointerUp.Invoke(new Vector2(eventData.position.x / canvas.transform.lossyScale.x, eventData.position.y / canvas.transform.lossyScale.y));
+                onPointerUp.Invoke(new Vector2(
+                    eventData.position.x / canvas.transform.lossyScale.x,
+                    eventData.position.y / canvas.transform.lossyScale.y));
             else
                 onPointerUp.Invoke(new Vector2(eventData.position.x, eventData.position.y));
         }

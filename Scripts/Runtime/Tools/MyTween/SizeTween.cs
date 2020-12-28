@@ -16,33 +16,37 @@ namespace hootybird.Tween
 
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            Vector2 currentValue;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                        _value = Vector2.Lerp(from, to, curve.Evaluate(value));
+                        currentValue = Vector2.Lerp(from, to, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector2.Lerp(from, to, curve.Evaluate(1f));
                         isPlaying = false;
-                        _value = Vector2.Lerp(from, to, curve.Evaluate(1f));
                     }
                     break;
-                case PlaybackDirection.BACKWARD:
+
+                default:
                     if (value < 1f)
-                        _value = Vector2.Lerp(to, from, curve.Evaluate(value));
+                        currentValue = Vector2.Lerp(to, from, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector2.Lerp(to, from, curve.Evaluate(1f));
                         isPlaying = false;
-                        _value = Vector2.Lerp(to, from, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            SetSize(_value);
+            SetSize(currentValue);
         }
 
         public void SetSize(Vector2 size)
         {
+            _value = size;
+
             if (rectTransform)
                 rectTransform.sizeDelta = size;
             else if (spriteRenderer)
@@ -51,10 +55,7 @@ namespace hootybird.Tween
 
         public override void OnReset()
         {
-            if (rectTransform)
-                rectTransform.sizeDelta = from;
-            else if (spriteRenderer)
-                spriteRenderer.size = from;
+            SetSize(from);
         }
 
         public override void OnInitialized()

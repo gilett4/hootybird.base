@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace hootybird._Updates.UI.Helpers
+namespace hootybird.Helpers
 {
     [ExecuteInEditMode]
     public class OnRatio : MonoBehaviour

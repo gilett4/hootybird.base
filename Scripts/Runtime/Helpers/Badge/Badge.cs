@@ -8,14 +8,17 @@ namespace hootybird.UI.Helpers
 {
     public class Badge : MonoBehaviour
     {
-        public bool hideOnEmpty = true;
-        public bool thisTarget = true;
-        public string format = "{0}";
+        [SerializeField]
+        internal bool hideOnEmpty = true;
+        [SerializeField]
+        internal bool thisTarget = true;
+        [SerializeField]
+        internal string format = "{0}";
         
-        [ShowIf("ShowCheck")]
-        public GameObject targetObject;
-        [ShowIf("ShowCheck")]
-        public TextMeshProUGUI targetText;
+        [ShowIf("ShowCheck"), SerializeField]
+        internal GameObject targetObject = default;
+        [ShowIf("ShowCheck"), SerializeField]
+        internal TextMeshProUGUI targetText = default;
         
         private bool initialized = false;
 
@@ -28,50 +31,41 @@ namespace hootybird.UI.Helpers
         {
             Initialize();
             
-            if (!targetObject)
-                return;
+            if (!targetObject) return;
 
             if (hideOnEmpty)
             {
                 if (string.IsNullOrEmpty(value))
                 {
                     Hide();
+
                     return;
                 }
 
-                int intValue = -1;
-
-                if (int.TryParse(value, out intValue) && intValue == 0)
+                if (int.TryParse(value, out int intValue) && intValue == 0)
                 {
                     Hide();
+
                     return;
                 }
             }
 
-            if (!targetText)
-                return;
+            if (!targetText) return;
 
             Show();
 
             targetText.text = string.Format(format, value);
         }
 
-        public void SetValue(float value)
-        {
-            SetValue(value.ToString());
-        }
+        public void SetValue(float value) => SetValue(value.ToString());
 
-        public void SetValue(int value)
-        {
-            SetValue(value.ToString());
-        }
+        public void SetValue(int value) => SetValue(value.ToString());
 
         public void Hide()
         {
             Initialize();
 
-            if (!targetObject)
-                return;
+            if (!targetObject) return;
 
             targetObject.SetActive(false);
         }
@@ -80,8 +74,7 @@ namespace hootybird.UI.Helpers
         {
             Initialize();
 
-            if (!targetObject)
-                return;
+            if (!targetObject) return;
 
             targetObject.SetActive(true);
         }
@@ -96,20 +89,14 @@ namespace hootybird.UI.Helpers
 
         private void Initialize()
         {
-            if (initialized)
-                return;
+            if (initialized) return;
 
-            if (thisTarget)
-                targetObject = gameObject;
+            if (thisTarget) targetObject = gameObject;
 
-            if (!targetText)
-                targetText = targetObject.GetComponentInChildren<TextMeshProUGUI>();
+            if (!targetText) targetText = targetObject.GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        //editor stuff
-        public bool ShowCheck()
-        {
-            return !thisTarget;
-        }
+        //editor
+        private bool ShowCheck() => !thisTarget;
     }
 }

@@ -13,39 +13,41 @@ namespace hootybird.Tween
 
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            Vector3 currentValue;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                        _value = Vector3.LerpUnclamped(from, to, curve.Evaluate(value));
+                        currentValue = Vector3.LerpUnclamped(from, to, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector3.LerpUnclamped(from, to, curve.Evaluate(1f));
                         isPlaying = false;
-                        _value = Vector3.LerpUnclamped(from, to, curve.Evaluate(1f));
                     }
                     break;
-                case PlaybackDirection.BACKWARD:
+
+                default:
                     if (value < 1f)
-                        _value = Vector3.LerpUnclamped(to, from, curve.Evaluate(value));
+                        currentValue = Vector3.LerpUnclamped(to, from, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector3.LerpUnclamped(to, from, curve.Evaluate(1f));
                         isPlaying = false;
-                        _value = Vector3.LerpUnclamped(to, from, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            SetScale(_value);
+            SetScale(currentValue);
         }
 
         public void SetScale(Vector3 scale)
         {
-            transform.localScale = scale;
+            transform.localScale = _value = scale;
         }
 
         public override void OnReset()
         {
-            transform.localScale = from;
+            SetScale(from);
         }
 
         public override void OnInitialized() { }

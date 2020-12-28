@@ -16,35 +16,36 @@ namespace hootybird.Tween
 
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            Vector3 currentPosition;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                        _value = GetBezierPoint(from, from + control, to, curve.Evaluate(value));
+                        currentPosition = GetBezierPoint(from, from + control, to, curve.Evaluate(value));
                     else
                     {
+                        currentPosition = GetBezierPoint(from, from + control, to, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = GetBezierPoint(from, from + control, to, curve.Evaluate(1f));
                     }
                     break;
-                case PlaybackDirection.BACKWARD:
+                default:
                     if (value < 1f)
-                        _value = GetBezierPoint(from, from + control, to, curve.Evaluate(1f - value));
+                        currentPosition = GetBezierPoint(from, from + control, to, curve.Evaluate(1f - value));
                     else
                     {
+                        currentPosition = GetBezierPoint(from, from + control, to, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = GetBezierPoint(from, from + control, to, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            SetPosition(_value);
+            SetPosition(currentPosition);
         }
 
         public void SetPosition(Vector3 position)
         {
+            _value = position;
+
             if (rectTransform)
                 rectTransform.anchoredPosition = position;
             else
@@ -67,6 +68,11 @@ namespace hootybird.Tween
         public override void OnInitialized()
         {
             rectTransform = GetComponent<RectTransform>();
+
+            if (rectTransform) 
+                _value = rectTransform.anchoredPosition;
+            else 
+                _value = transform.localPosition;
         }
     }
 }

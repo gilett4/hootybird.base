@@ -14,43 +14,51 @@ namespace hootybird.Tween
 
         public float _value { get; private set; }
 
-        public override void OnReset()
-        {
-            audioSource.volume = from;
-        }
-
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            float currentValue;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                        _value = Mathf.Lerp(from, to, curve.Evaluate(value));
+                        currentValue = Mathf.Lerp(from, to, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Mathf.Lerp(from, to, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Mathf.Lerp(from, to, curve.Evaluate(1f));
                     }
                     break;
-                case PlaybackDirection.BACKWARD:
+
+                default:
                     if (value < 1f)
-                        _value = Mathf.Lerp(to, from, curve.Evaluate(value));
+                        currentValue = Mathf.Lerp(to, from, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Mathf.Lerp(to, from, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Mathf.Lerp(to, from, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            SetVolume(_value);
+            SetVolume(currentValue);
         }
 
         public void SetVolume(float value)
         {
-            audioSource.volume = value;
+            if (!audioSource)
+            {
+                if (isPlaying)
+                    isPlaying = false;
+
+                Debug.LogWarning($"AudioSource is missing {gameObject.name}");
+            }
+
+            audioSource.volume = _value = value;
+        }
+
+        public override void OnReset()
+        {
+            SetVolume(from);
         }
 
         public override void OnInitialized()

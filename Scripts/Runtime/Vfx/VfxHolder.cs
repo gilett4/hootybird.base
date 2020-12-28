@@ -13,7 +13,7 @@ namespace hootybird.Mechanics._Vfx
         public static VfxHolder Instance;
 
         [ReorderableList, SerializeField]
-        private List<VFXDataHolder> data;
+        private List<VFXDataHolder> data = default;
 
         private Dictionary<string, List<PoolManager>> pools;
 

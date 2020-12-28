@@ -23,42 +23,41 @@ namespace hootybird.Tween
 
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            Vector3 currentValue;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                    {
-                        _value = Vector3.Lerp(from, to, curve.Evaluate(value));
-                    }
+                        currentValue = Vector3.Lerp(from, to, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector3.Lerp(from, to, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Vector3.Lerp(from, to, curve.Evaluate(1f));
                     }
                     break;
-                case PlaybackDirection.BACKWARD:
+
+                default:
                     if (value < 1f)
-                        _value = Vector3.Lerp(to, from, curve.Evaluate(value));
+                        currentValue = Vector3.Lerp(to, from, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector3.Lerp(to, from, curve.Evaluate(1f));
                         isPlaying = false;
-                        _value = Vector3.Lerp(to, from, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            SetRotation(_value);
+            SetRotation(currentValue);
         }
 
         public void SetRotation(Vector3 rotation)
         {
-            transform.localEulerAngles = rotation;
+            transform.localEulerAngles = _value = rotation;
         }
 
         public override void OnReset()
         {
-            transform.localEulerAngles = from;
+            SetRotation(from);
         }
 
         public override void OnInitialized() { }

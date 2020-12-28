@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace hootybird._Updates.UI.Helpers
+namespace hootybird.Helpers
 {
     [ExecuteInEditMode]
     public class OnIPhoneX : MonoBehaviour
@@ -34,12 +34,15 @@ namespace hootybird._Updates.UI.Helpers
         public void CheckPlatform()
         {
 #if UNITY_IOS || UNITY_EDITOR
-            if (generation < 0 || (UnityEngine.iOS.DeviceGeneration)generation != (forceiPhoneX ? UnityEngine.iOS.DeviceGeneration.iPhoneX : UnityEngine.iOS.Device.generation))
+            if (generation < 0 ||
+                (UnityEngine.iOS.DeviceGeneration)generation !=
+                    (forceiPhoneX ? UnityEngine.iOS.DeviceGeneration.iPhoneX : UnityEngine.iOS.Device.generation))
             {
                 if (UnityEngine.iOS.Device.generation == UnityEngine.iOS.DeviceGeneration.iPhoneX ||
                     UnityEngine.iOS.Device.generation == UnityEngine.iOS.DeviceGeneration.iPhoneXR ||
                     UnityEngine.iOS.Device.generation == UnityEngine.iOS.DeviceGeneration.iPhoneXS ||
-                    UnityEngine.iOS.Device.generation == UnityEngine.iOS.DeviceGeneration.iPhoneXSMax || forceiPhoneX)
+                    UnityEngine.iOS.Device.generation == UnityEngine.iOS.DeviceGeneration.iPhoneXSMax ||
+                    forceiPhoneX)
                     onIPhoneX?.Invoke();
                 else
                     other?.Invoke();

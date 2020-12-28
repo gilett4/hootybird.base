@@ -1,6 +1,7 @@
 ﻿//@vadym udod
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -17,9 +18,11 @@ namespace hootybird.Tween
         public RepeatType repeat = RepeatType.NONE;
         public UnityEventFloat onProgress;
 
-        //for instances where event need to be assigned from code
         public Action<float> _onProgress;
 
+        /// <summary>
+        /// progress value
+        /// </summary>
         public float value { get; protected set; }
         public float defaultPlaybackTime { get; protected set; }
         public bool isPlaying { get; protected set; }
@@ -152,12 +155,42 @@ namespace hootybird.Tween
                 }
         }
 
+        public List<Graphics> DoParse(Transform[] customObjects, bool propagate)
+        {
+            List<Graphics> _graphics = new List<Graphics>();
+
+            if (customObjects.Length != 0)
+                foreach (Transform obj in customObjects)
+                    _graphics = Parse(obj, propagate);
+            else
+                _graphics = Parse(transform, propagate);
+
+            return _graphics;
+        }
+
+        public List<Graphics> Parse(Transform obj, bool propagate)
+        {
+            List<Graphics> _graphics = new List<Graphics>();
+
+            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
+            MaskableGraphic graphics = obj.GetComponent<MaskableGraphic>();
+            LineRenderer lineRenderer = obj.GetComponent<LineRenderer>();
+
+            _graphics.Add(new Graphics() { spriteRenderer = renderer, uiGraphics = graphics, lineRenderer = lineRenderer });
+
+            if (propagate)
+                for (int i = 0; i < obj.childCount; i++)
+                    Parse(obj.GetChild(i), propagate);
+
+            return _graphics;
+        }
+
         public abstract void OnReset();
         public abstract void OnInitialized();
         public abstract void AtProgress(Single value, PlaybackDirection direction);
     }
 
-    public class GraphicsColorGroup
+    public class Graphics
     {
         public CanvasGroup canvasGroup;
         public MaskableGraphic uiGraphics;
@@ -173,9 +206,17 @@ namespace hootybird.Tween
                 else if (uiGraphics)
                     uiGraphics.color = new Color(uiGraphics.color.r, uiGraphics.color.g, uiGraphics.color.b, value);
                 else if (spriteRenderer)
-                    spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, value);
+                    spriteRenderer.color = new Color(
+                        spriteRenderer.color.r, 
+                        spriteRenderer.color.g,
+                        spriteRenderer.color.b, 
+                        value);
                 else if (lineRenderer)
-                    lineRenderer.startColor = lineRenderer.endColor = new Color(lineRenderer.startColor.r, lineRenderer.startColor.g, lineRenderer.startColor.b, value);
+                    lineRenderer.startColor = lineRenderer.endColor = new Color(
+                        lineRenderer.startColor.r, 
+                        lineRenderer.startColor.g, 
+                        lineRenderer.startColor.b, 
+                        value);
             }
             get
             {
@@ -203,11 +244,14 @@ namespace hootybird.Tween
         public void SetColor(Color _color, bool changeAlpha)
         {
             if (uiGraphics)
-                uiGraphics.color = changeAlpha ? _color : new Color(_color.r, _color.g, _color.b, uiGraphics.color.a);
+                uiGraphics.color = changeAlpha ? _color : 
+                    new Color(_color.r, _color.g, _color.b, uiGraphics.color.a);
             else if (spriteRenderer)
-                spriteRenderer.color = changeAlpha ? _color : new Color(_color.r, _color.g, _color.b, spriteRenderer.color.a);
+                spriteRenderer.color = changeAlpha ? _color : 
+                    new Color(_color.r, _color.g, _color.b, spriteRenderer.color.a);
             else if (lineRenderer)
-                lineRenderer.startColor = lineRenderer.endColor = changeAlpha ? _color : new Color(_color.r, _color.g, _color.b, lineRenderer.startColor.a);
+                lineRenderer.startColor = lineRenderer.endColor = changeAlpha ? _color : 
+                    new Color(_color.r, _color.g, _color.b, lineRenderer.startColor.a);
         }
     }
 

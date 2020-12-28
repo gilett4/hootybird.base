@@ -8,7 +8,6 @@ namespace hootybird.Tween
     {
         public Vector3 from;
         public Vector3 to;
-
         public bool local = true;
 
         private RectTransform rectTransform;
@@ -25,35 +24,37 @@ namespace hootybird.Tween
 
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            Vector3 currentValue;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                        _value = Vector3.Lerp(from, to, curve.Evaluate(value));
+                        currentValue = Vector3.Lerp(from, to, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector3.Lerp(from, to, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Vector3.Lerp(from, to, curve.Evaluate(1f));
                     }
                     break;
-                case PlaybackDirection.BACKWARD:
+
+                default:
                     if (value < 1f)
-                        _value = Vector3.Lerp(to, from, curve.Evaluate(value));
+                        currentValue = Vector3.Lerp(to, from, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Vector3.Lerp(to, from, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Vector3.Lerp(to, from, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            SetPosition(_value);
+            SetPosition(currentValue);
         }
 
         public void SetPosition(Vector3 position)
         {
+            _value = position;
+
             if (local)
             {
                 if (rectTransform)
@@ -62,19 +63,27 @@ namespace hootybird.Tween
                     transform.localPosition = position;
             }
             else
-            {
                 transform.position = position;
-            }
         }
 
         public override void OnReset()
         {
-            transform.localPosition = from;
+            SetPosition(from);
         }
 
         public override void OnInitialized()
         {
             rectTransform = GetComponent<RectTransform>();
+
+            if (local)
+            {
+                if (rectTransform)
+                    _value = rectTransform.anchoredPosition;
+                else
+                    _value = transform.localPosition;
+            }
+            else
+                _value = transform.position;
         }
     }
 }

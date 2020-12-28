@@ -11,25 +11,34 @@ using UnityEngine.Audio;
 
 namespace hootybird.audio
 {
-    /// <summary>
-    /// Manages sfx's and stores references to all game audio.
-    /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public class AudioHolder : MonoBehaviour
     {
-        public static AudioHolder Instance { get; protected set; }
+        public static AudioHolder Instance
+        {
+            get
+            {
+                if (!instance) instance = Instantiate(Resources.Load("AudioHolder") as AudioHolder);
+                return instance;
+            }
+
+            //private set;
+        }
+
+        private static AudioHolder instance;
 
         [SerializeField]
-        protected AudioMixer mixer;
+        protected AudioMixer mixer = default;
         [SerializeField]
-        protected AudioMixerGroup bgOutputGroup;
+        protected AudioMixerGroup bgOutputGroup = default;
         [SerializeField]
-        protected AudioDataHolder[] audioData;
+        protected AudioDataHolder[] audioData = default;
 
         private AudioSource audioSource;
         private Dictionary<string, SerializedAudioData> fastAccess = new Dictionary<string, SerializedAudioData>();
         private Dictionary<string, CachedAudioData> currentPlayedPool = new Dictionary<string, CachedAudioData>();
         private Queue<string> toRemove = new Queue<string>();
+
 
         public List<BGAudio> currentlyPlayingBG { get; private set; }
 
@@ -41,7 +50,7 @@ namespace hootybird.audio
                 return;
             }
 
-            Instance = this;
+            //Instance = this;
 
             DontDestroyOnLoad(gameObject);
 
@@ -60,8 +69,10 @@ namespace hootybird.audio
             if (currentPlayedPool.Count > 0)
             {
                 foreach (string clip in currentPlayedPool.Keys.ToList())
-                    if (currentPlayedPool[clip].durationLeft - Time.deltaTime > 0f) currentPlayedPool[clip].durationLeft -= Time.fixedDeltaTime;
-                    else toRemove.Enqueue(clip);
+                    if (currentPlayedPool[clip].durationLeft - Time.deltaTime > 0f) 
+                        currentPlayedPool[clip].durationLeft -= Time.fixedDeltaTime;
+                    else 
+                        toRemove.Enqueue(clip);
             }
 
             while (toRemove.Count > 0) currentPlayedPool.Remove(toRemove.Dequeue());

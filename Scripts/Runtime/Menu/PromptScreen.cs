@@ -1,7 +1,7 @@
 ﻿//@vadym udod
 
+using hootybird.Helpers;
 using hootybird.Tools.Localization;
-using hootybird.UI.Helpers;
 using System;
 using TMPro;
 
@@ -15,8 +15,8 @@ namespace hootybird.UI
         public TMP_Text promptTitle;
         public TMP_Text promptText;
 
-        public ButtonExtended acceptButton;
-        public ButtonExtended declineButton;
+        public ButtonExtension acceptButton;
+        public ButtonExtension declineButton;
 
         protected Action onAccept;
         protected Action onDecline;
@@ -28,10 +28,20 @@ namespace hootybird.UI
             Decline();
         }
 
-        public virtual void Prompt(string title, string text, Action accept = null, Action decline = null) =>
+        public virtual void Prompt(
+            string title,
+            string text,
+            Action accept = null,
+            Action decline = null) =>
             Prompt(title, text, LocalizationManager.Value("yes"), LocalizationManager.Value("no"), accept, decline);
 
-        public virtual void Prompt(string title, string text, string yes, string no, Action accept = null, Action decline = null)
+        public virtual void Prompt(
+            string title,
+            string text,
+            string yes,
+            string no,
+            Action accept = null,
+            Action decline = null)
         {
             onDecline = decline;
             onAccept = accept;

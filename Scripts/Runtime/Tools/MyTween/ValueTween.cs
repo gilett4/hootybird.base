@@ -17,43 +17,44 @@ namespace hootybird.Tween
 
         public override void AtProgress(float value, PlaybackDirection direction)
         {
+            float currentValue;
             switch (direction)
             {
                 case PlaybackDirection.FORWARD:
                     if (value < 1f)
-                        _value = Mathf.Lerp(from, to, curve.Evaluate(value));
+                        currentValue = Mathf.Lerp(from, to, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Mathf.Lerp(from, to, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Mathf.Lerp(from, to, curve.Evaluate(1f));
                     }
                     break;
 
-                case PlaybackDirection.BACKWARD:
+                default:
                     if (value < 1f)
-                        _value = Mathf.Lerp(to, from, curve.Evaluate(value));
+                        currentValue = Mathf.Lerp(to, from, curve.Evaluate(value));
                     else
                     {
+                        currentValue = Mathf.Lerp(to, from, curve.Evaluate(1f));
                         isPlaying = false;
-
-                        _value = Mathf.Lerp(to, from, curve.Evaluate(1f));
                     }
                     break;
             }
 
-            InvokeValue(_value);
+            InvokeValue(currentValue);
         }
 
         public void InvokeValue(float value)
         {
+            _value = value;
+
             onValue?.Invoke(value);
             _onValue?.Invoke(value);
         }
 
         public override void OnReset()
         {
-            AtProgress(0f);
+            InvokeValue(0f);
         }
 
         public override void OnInitialized() { }
