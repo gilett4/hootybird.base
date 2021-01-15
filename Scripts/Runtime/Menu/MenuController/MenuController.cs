@@ -13,6 +13,9 @@ namespace hootybird.UI
     /// </summary>
     public class MenuController : MonoBehaviour
     {
+        public const string MAIN_MENU_CANVAS_NAME = "MainMenuCanvas";
+        public const string GAMEPLAY_MENU_CANVAS_NAME = "GameSceneCanvas";
+
         public static MenuController activeMenu
         {
             get

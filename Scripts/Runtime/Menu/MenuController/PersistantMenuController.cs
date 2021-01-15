@@ -7,6 +7,10 @@ namespace hootybird.UI
 {
     public class PersistantMenuController : MenuController
     {
+        public const string GAMEPLAY_SCENE_NAME = "gamePlayNew";
+        public const string MAIN_MENU_SCENE_NAME = "tabbedUINew";
+        public const string LOGO_SCENE_NAME = "logo";
+
         public static PersistantMenuController instance;
 
         protected override void Awake()
@@ -52,9 +56,12 @@ namespace hootybird.UI
                 }
                 else
                 {
-                    MenuController underlayingMenuController = GetMenu(Constants.GAMEPLAY_MENU_CANVAS_NAME) ?? GetMenu(Constants.MAIN_MENU_CANVAS_NAME);
+                    MenuController underlayingMenuController = 
+                        GetMenu(GAMEPLAY_MENU_CANVAS_NAME) ?? 
+                        GetMenu(MAIN_MENU_CANVAS_NAME);
 
-                    if (underlayingMenuController.screensStack.Count > 0) underlayingMenuController.screensStack.Peek().Open();
+                    if (underlayingMenuController.screensStack.Count > 0) 
+                        underlayingMenuController.screensStack.Peek().Open();
                 }
             }
         }
