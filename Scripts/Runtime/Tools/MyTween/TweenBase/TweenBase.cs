@@ -172,11 +172,12 @@ namespace hootybird.Tween
         {
             List<Graphics> _graphics = new List<Graphics>();
 
-            SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
-            MaskableGraphic graphics = obj.GetComponent<MaskableGraphic>();
-            LineRenderer lineRenderer = obj.GetComponent<LineRenderer>();
-
-            _graphics.Add(new Graphics() { spriteRenderer = renderer, uiGraphics = graphics, lineRenderer = lineRenderer });
+            _graphics.Add(new Graphics() { 
+                spriteRenderer = obj.GetComponent<SpriteRenderer>(), 
+                uiGraphics = obj.GetComponent<MaskableGraphic>(), 
+                lineRenderer = obj.GetComponent<LineRenderer>(),
+                canvasGroup = obj.GetComponent<CanvasGroup>(),
+            });
 
             if (propagate)
                 for (int i = 0; i < obj.childCount; i++)
