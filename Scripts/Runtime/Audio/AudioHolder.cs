@@ -18,7 +18,11 @@ namespace hootybird.audio
         {
             get
             {
-                if (!instance) instance = Instantiate(Resources.Load("AudioHolder") as AudioHolder);
+                if (!instance)
+                {
+                    instance = Instantiate(Resources.Load<AudioHolder>("AudioHolder"));
+                }
+
                 return instance;
             }
 
@@ -44,6 +48,11 @@ namespace hootybird.audio
 
         protected void Awake()
         {
+            if (instance == null)
+            {
+                instance = this;
+            }
+
             if (Instance != null)
             {
                 Destroy(gameObject);
