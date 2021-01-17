@@ -9,6 +9,9 @@ namespace hootybird.Helpers
     public class ToggleExtension : MonoBehaviour
     {
         [SerializeField]
+        private bool useWithoutNotifyCalls = true;
+
+        [SerializeField]
         private UnityEvent onToggleOn = default;
         [SerializeField]
         private UnityEvent onToggleOff = default;
@@ -47,6 +50,11 @@ namespace hootybird.Helpers
 
         public void SetIsOnWithoutNotify(bool value)
         {
+            if (useWithoutNotifyCalls)
+            {
+                OnToggle(value);
+            }
+
             if (!CheckRequired()) return;
 
             toggle.SetIsOnWithoutNotify(value);
