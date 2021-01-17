@@ -15,11 +15,41 @@ namespace hootybird.Helpers
 
         private Toggle toggle;
 
+        public bool isOn
+        {
+            get
+            {
+                if (!CheckRequired())
+                {
+                    return false;
+                }
+
+                return toggle.isOn;
+            }
+
+            set
+            {
+                if (!CheckRequired())
+                {
+                    return;
+                }
+
+                toggle.isOn = value;
+            }
+        }
+
         protected void Awake()
         {
             toggle = GetComponent<Toggle>();
 
             toggle.onValueChanged.AddListener(OnToggle);
+        }
+
+        public void SetIsOnWithoutNotify(bool value)
+        {
+            if (!CheckRequired()) return;
+
+            toggle.SetIsOnWithoutNotify(value);
         }
 
         private void OnToggle(bool value)
@@ -32,6 +62,16 @@ namespace hootybird.Helpers
             {
                 onToggleOff?.Invoke();
             }
+        }
+
+        private bool CheckRequired()
+        {
+            if (!toggle)
+            {
+                Debug.Log($"{name} requires Toggle component");
+            }
+
+            return toggle;
         }
     }
 }
