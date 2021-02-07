@@ -46,7 +46,6 @@ namespace hootybird.audio
         private Dictionary<string, CachedAudioData> currentPlayedPool = new Dictionary<string, CachedAudioData>();
         private Queue<string> toRemove = new Queue<string>();
 
-
         public List<BGAudio> currentlyPlayingBG { get; private set; }
 
         protected void Awake()
@@ -57,10 +56,7 @@ namespace hootybird.audio
 
                 return;
             }
-        }
 
-        protected void Start()
-        {
             DontDestroyOnLoad(gameObject);
 
             audioSource = GetComponent<AudioSource>();
