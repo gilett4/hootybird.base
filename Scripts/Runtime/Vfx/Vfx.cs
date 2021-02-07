@@ -141,6 +141,6 @@ namespace hootybird.Mechanics._Vfx
             PutBack();
         }
 
-        public void PlaySfx(string audio, float volume) => AudioHolder.Instance.PlaySelfSfxOneShotTracked(audio, volume);
+        public void PlaySfx(string audio, float volume) => AudioManager.Instance.PlaySfx(audio, volume);
     }
 }

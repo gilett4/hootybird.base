@@ -33,7 +33,11 @@ namespace hootybird.Serialized
             if (audios.Count > 0)
             {
                 foreach (SeriazliedAudioLanguagePair seriazliedAudioLanguagePair in audios)
-                    if (seriazliedAudioLanguagePair.clips.Length == 0) continue;
+                {
+                    if (seriazliedAudioLanguagePair.clips.Length == 0)
+                    {
+                        continue;
+                    }
                     else
                     {
                         if (seriazliedAudioLanguagePair.language == language)
@@ -42,16 +46,29 @@ namespace hootybird.Serialized
                             {
                                 if (playInSequence)
                                 {
-                                    if (lastIndex + 1 >= seriazliedAudioLanguagePair.clips.Length) lastIndex = 0;
-                                    else lastIndex++;
+                                    if (lastIndex + 1 >= seriazliedAudioLanguagePair.clips.Length)
+                                    {
+                                        lastIndex = 0;
+                                    }
+                                    else
+                                    {
+                                        lastIndex++;
+                                    }
 
                                     return seriazliedAudioLanguagePair.clips[lastIndex];
                                 }
-                                else return seriazliedAudioLanguagePair.clips.Random();
+                                else
+                                {
+                                    return seriazliedAudioLanguagePair.clips.Random();
+                                }
                             }
-                            else return seriazliedAudioLanguagePair.clips[clipIndex];
+                            else
+                            {
+                                return seriazliedAudioLanguagePair.clips[clipIndex];
+                            }
                         }
                     }
+                }
 
                 SeriazliedAudioLanguagePair randomOne = audios.Where(data => data.clips.Length > 0).Random();
 
@@ -61,13 +78,26 @@ namespace hootybird.Serialized
                     {
                         if (playInSequence)
                         {
-                            if (lastIndex + 1 >= randomOne.clips.Length) lastIndex = 0;
-                            else lastIndex++;
+                            if (lastIndex + 1 >= randomOne.clips.Length)
+                            {
+                                lastIndex = 0;
+                            }
+                            else
+                            {
+                                lastIndex++;
+                            }
+
                             return randomOne.clips[lastIndex];
                         }
-                        else return randomOne.clips.Random();
+                        else
+                        {
+                            return randomOne.clips.Random();
+                        }
                     }
-                    else return randomOne.clips[clipIndex];
+                    else
+                    {
+                        return randomOne.clips[clipIndex];
+                    }
                 }
             }
 
@@ -78,16 +108,7 @@ namespace hootybird.Serialized
     [Serializable]
     public class SeriazliedAudioLanguagePair
     {
-        [HideInInspector]
-        public string _name;
-        [ShowIf("ShowIf")]
-        public SystemLanguage language;
+        public SystemLanguage language = SystemLanguage.Unknown;
         public AudioClip[] clips;
-
-        private bool ShowIf()
-        {
-            _name = language.ToString();
-            return true;
-        }
     }
 }

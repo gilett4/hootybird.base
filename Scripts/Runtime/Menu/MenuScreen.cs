@@ -154,7 +154,7 @@ namespace hootybird.UI
         {
             onBack.Invoke();
 
-            if (AudioHolder.Instance) AudioHolder.Instance.PlaySelfSfxOneShotTracked(onBackSfx);
+            if (AudioManager.Instance) AudioManager.Instance.PlaySfx(onBackSfx);
         }
 
         public virtual void BackToRoot() => menuController.BackToRoot();
