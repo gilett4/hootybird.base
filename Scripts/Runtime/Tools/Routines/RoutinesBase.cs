@@ -23,13 +23,20 @@ namespace hootybird.Tools
         /// <param name="routine"></param>
         /// <param name="onEnd"></param>
         /// <param name="onCanceled"></param>
-        public Coroutine StartRoutine(string name, IEnumerator routine, Action onEnd = null, Action onCanceled = null)
+        public Coroutine StartRoutine(
+            string name,
+            IEnumerator routine,
+            Action onEnd = null,
+            Action onCanceled = null)
         {
             if (!routines.ContainsKey(name))
             {
                 RoutineClass _routineContainer = new RoutineClass(this, name, routine, onEnd, onCanceled);
 
-                if (!_routineContainer.terminated) routines.Add(name, _routineContainer);
+                if (!_routineContainer.terminated)
+                {
+                    routines.Add(name, _routineContainer);
+                }
 
                 return _routineContainer.WaitFor();
             }
@@ -37,7 +44,8 @@ namespace hootybird.Tools
             return null;
         }
 
-        public Coroutine StartRoutine(string name, IEnumerator routine, Action both) => StartRoutine(name, routine, both, both);
+        public Coroutine StartRoutine(string name, IEnumerator routine, Action both) =>
+            StartRoutine(name, routine, both, both);
 
         /// <summary>
         /// Start a routine with time value
@@ -52,7 +60,10 @@ namespace hootybird.Tools
             {
                 RoutineClass _routineContainer = new RoutineClass(this, name, time, onEnd, onCanceled);
 
-                if (!_routineContainer.terminated) routines.Add(name, _routineContainer);
+                if (!_routineContainer.terminated)
+                {
+                    routines.Add(name, _routineContainer);
+                }
 
                 return _routineContainer.WaitFor();
             }
@@ -60,7 +71,8 @@ namespace hootybird.Tools
             return null;
         }
 
-        public Coroutine StartRoutine(string name, float time, Action both) => StartRoutine(name, time, both, both);
+        public Coroutine StartRoutine(string name, float time, Action both) =>
+            StartRoutine(name, time, both, both);
 
         /// <summary>
         /// Is specified routine active?
@@ -95,7 +107,10 @@ namespace hootybird.Tools
         {
             List<string> keys = new List<string>(routines.Keys);
 
-            foreach (string key in keys) StopRoutine(key, callEnded);
+            foreach (string key in keys)
+            {
+                StopRoutine(key, callEnded);
+            }
         }
 
         /// <summary>
@@ -122,7 +137,9 @@ namespace hootybird.Tools
         public void RemoveRoutine(string name)
         {
             if (routines.ContainsKey(name))
+            {
                 routines.Remove(name);
+            }
         }
     }
 
@@ -138,7 +155,12 @@ namespace hootybird.Tools
         public Coroutine nested;
         private IEnumerator payload;
 
-        public RoutineClass(RoutinesBase owner, string name, IEnumerator routine, Action onEnded, Action onCanceled)
+        public RoutineClass(
+            RoutinesBase owner,
+            string name,
+            IEnumerator routine,
+            Action onEnded,
+            Action onCanceled)
         {
             this.name = name;
             this.owner = owner;
@@ -171,8 +193,14 @@ namespace hootybird.Tools
             terminated = true;
             owner.RemoveRoutine(name);
 
-            if (callOnEnded && onEnded != null) onEnded.Invoke();
-            if (nested != null) owner.StopCoroutine(nested);
+            if (callOnEnded && onEnded != null)
+            {
+                onEnded.Invoke();
+            }
+            if (nested != null)
+            {
+                owner.StopCoroutine(nested);
+            }
         }
 
         public void Cancel()
@@ -186,9 +214,28 @@ namespace hootybird.Tools
         {
             if (time == 0f)
             {
-                if (payload != null) while (payload.MoveNext() && !terminated) yield return payload.Current;
+                if (payload != null)
+                {
+                    while (payload.MoveNext() && !terminated)
+                    {
+                        yield return payload.Current;
+                    }
+                }
             }
-            else if (time < 0f) while (true) if (terminated) yield break; else yield return null;
+            else if (time < 0f)
+            {
+                while (true)
+                {
+                    if (terminated)
+                    {
+                        yield break;
+                    }
+                    else
+                    {
+                        yield return null;
+                    }
+                }
+            }
             else
             {
                 float timer = 0f;
@@ -196,7 +243,9 @@ namespace hootybird.Tools
                 while (timer < time)
                 {
                     if (terminated)
+                    {
                         yield break;
+                    }
                     else
                     {
                         yield return null;

@@ -17,10 +17,11 @@ namespace hootybird.UI
     [RequireComponent(typeof(CanvasGroup))]
     public class MenuScreen : RoutinesBase
     {
-        public bool closePreviousWhenOpened = true;
+        [SerializeField]
+        protected bool closePreviousWhenOpened = true;
 
         [HideInInspector]
-        public MenuController menuController;
+        public MenuController menuController { get; private set; }
 
         [SerializeField]
         protected UnityEvent onClose;
@@ -58,7 +59,9 @@ namespace hootybird.UI
             rectTransform = GetComponent<RectTransform>();
             layoutElement = GetComponent<LayoutElement>();
 
-            widgets = new List<WidgetBase>(GetComponentsInChildren<WidgetBase>()).Where(widget => widget.GetComponentInParent<MenuScreen>() == this).ToList();
+            widgets = new List<WidgetBase>(GetComponentsInChildren<WidgetBase>())
+                .Where(widget => widget.GetComponentInParent<MenuScreen>() == this)
+                .ToList();
         }
 
         protected virtual void Start()
@@ -86,7 +89,10 @@ namespace hootybird.UI
 
             isOpened = true;
 
-            if (tween) tween.PlayForward(true);
+            if (tween)
+            {
+                tween.PlayForward(true);
+            }
 
             SetInteractable(true);
             SetBlockrays(true);
@@ -102,9 +108,13 @@ namespace hootybird.UI
             if (tween)
             {
                 if (animate)
+                {
                     tween.PlayBackward(true);
+                }
                 else
+                {
                     tween.Progress(0f, PlaybackDirection.FORWARD);
+                }
             }
 
             SetInteractable(false);
@@ -117,22 +127,32 @@ namespace hootybird.UI
         {
             if (menuController)
             {
-                if (isCurrent) menuController.CloseCurrentScreen(animate);
+                if (isCurrent)
+                {
+                    menuController.CloseCurrentScreen(animate);
+                }
                 else
                 {
                     Close(animate);
-                    if (menuController.screensStack.Contains(this)) menuController.screensStack.Remove(this);
+                    if (menuController.screensStack.Contains(this))
+                    {
+                        menuController.screensStack.Remove(this);
+                    }
                 }
             }
             else
+            {
                 Close(animate);
+            }
         }
 
         public virtual void ExecuteMenuEvent(MenuEvents menuEvent) { }
 
         public virtual bool IsWidgetVisible(WidgetBase widget)
         {
-            if (widget.gameObject.activeInHierarchy && widget.canvasGroup && widget.canvasGroup.alpha > 0f) return true;
+            if (widget.gameObject.activeInHierarchy &&
+                widget.canvasGroup &&
+                widget.canvasGroup.alpha > 0f) return true;
 
             return false;
         }
@@ -154,24 +174,36 @@ namespace hootybird.UI
         {
             onBack.Invoke();
 
-            if (AudioManager.Instance) AudioManager.Instance.PlaySfx(onBackSfx);
+            if (AudioManager.Instance)
+            {
+                AudioManager.Instance.PlaySfx(onBackSfx);
+            }
         }
 
         public virtual void BackToRoot() => menuController.BackToRoot();
 
         public void SetInteractable(bool state)
         {
-            if (canvasGroup) canvasGroup.interactable = state;
+            if (canvasGroup)
+            {
+                canvasGroup.interactable = state;
+            }
         }
 
         public void SetBlockrays(bool state)
         {
-            if (canvasGroup) canvasGroup.blocksRaycasts = state;
+            if (canvasGroup)
+            {
+                canvasGroup.blocksRaycasts = state;
+            }
         }
 
         public void UpdateWidgets() => widgets.ForEach(widget => widget._Update());
 
-        public virtual List<T> GetWidgets<T>() => widgets.Where(widget => widget.GetType() == typeof(T) || widget.GetType().IsSubclassOf(typeof(T))).Cast<T>().ToList();
+        public virtual List<T> GetWidgets<T>() => widgets
+            .Where(widget => widget.GetType() == typeof(T) || widget.GetType().IsSubclassOf(typeof(T)))
+            .Cast<T>()
+            .ToList();
 
         protected virtual void OnInitialized() { }
     }
